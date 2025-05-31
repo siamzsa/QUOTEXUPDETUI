@@ -1,146 +1,395 @@
-<!-- Full Admin Panel - Firebase Connected with Result Handling -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel - Full Control</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: #121212; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee; display: flex; flex-direction: column; min-height: 100vh;
-      align-items: center; padding: 20px;
-    }
-    h1 { color: #4caf50; margin-bottom: 10px; text-shadow: 0 0 6px #4caf50aa; }
-    .container {
-      background: #1f1f1f; border-radius: 12px; padding: 30px 40px; max-width: 520px; width: 100%;
-      box-shadow: 0 0 20px #4caf50aa;
-    }
-    .btn-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 25px;
-    }
-    button.cmd-btn {
-      background: #282828; border: none; border-radius: 14px;
-      padding: 18px 20px; color: #eee; font-size: 16px; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; gap: 10px;
-      transition: background-color 0.25s ease, box-shadow 0.3s ease, transform 0.15s ease;
-    }
-    button.cmd-btn:hover {
-      background: #4caf50; color: #121212; box-shadow: 0 0 12px #4caf50aa; transform: translateY(-3px);
-    }
-    button.cmd-btn:active { transform: translateY(0); box-shadow: 0 0 5px #388e3c; }
-    button.cmd-btn i { font-size: 20px; transition: transform 0.3s ease; }
-    button.cmd-btn:hover i { transform: rotate(15deg); }
-    #log {
-      margin-top: 25px; background: #222; border-radius: 10px; padding: 14px 20px;
-      height: 200px; overflow-y: auto; font-family: monospace; font-size: 14px;
-      box-shadow: inset 0 0 10px #111;
-    }
-    footer {
-      margin-top: auto; color: #666; font-size: 13px; user-select: none;
-    }
-    .result { margin-top: 20px; background: #1b1b1b; border-radius: 10px; padding: 15px; }
-    .result a, .result audio, .result video, .result img { display: block; margin-top: 8px; max-width: 100%; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deposit, Withdraw & Transaction History</title>
+<style>
+  body {
+    background: #121212;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .container {
+    background: #1f1f1f;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 0 20px rgb(255 255 255 / 0.1);
+    overflow: hidden;
+    position: relative;
+  }
+  .tabs {
+    display: flex;
+    background: #2c2c2c;
+    user-select: none;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    cursor: pointer;
+    color: #aaa;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+  }
+  .tab.active {
+    color: #f0b90b;
+    border-bottom: 3px solid #f0b90b;
+    font-weight: 700;
+  }
+  form {
+    padding: 1.5rem 1.5rem 2rem;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #2f2f2f;
+    color: #eee;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    transition: background 0.3s ease;
+  }
+  input[type="file"] {
+    padding: 6px 10px;
+  }
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="file"]:focus {
+    outline: none;
+    background: #444;
+  }
+  button {
+    background: #f0b90b;
+    border: none;
+    color: #121212;
+    font-weight: 700;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #d3a50a;
+  }
+  /* animation */
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  /* Loader Styles */
+  .loader-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(18, 18, 18, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 12px;
+  }
+  .loader {
+    border: 5px solid #f0b90b;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Success Message Box */
+  .success-message {
+    position: absolute;
+    inset: 0;
+    background: #222;
+    color: #f0b90b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    border-radius: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    z-index: 15;
+    padding: 1rem;
+    text-align: center;
+  }
+  .success-message.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  /* Transaction Table */
+  .transaction-container {
+    padding: 1rem 1.5rem;
+    max-height: 320px;
+    overflow-y: auto;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+    color: #ddd;
+  }
+  th {
+    background: #2c2c2c;
+    color: #f0b90b;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .status-success {
+    color: #4caf50;
+    font-weight: 600;
+  }
+  .status-pending {
+    color: #f0b90b;
+    font-weight: 600;
+  }
+  .status-failed {
+    color: #e53935;
+    font-weight: 600;
+  }
+
+</style>
 </head>
 <body>
 
-<h1><i class="fas fa-user-shield"></i> Admin Panel</h1>
-
 <div class="container">
-  <div class="btn-grid">
-    <button class="cmd-btn" onclick="sendCommand('take_photo')"><i class="fas fa-camera"></i> Take Photo</button>
-    <button class="cmd-btn" onclick="sendCommand('start_voice_record')"><i class="fas fa-microphone"></i> Start Voice</button>
-    <button class="cmd-btn" onclick="sendCommand('stop_voice_record')"><i class="fas fa-stop"></i> Stop Voice</button>
-    <button class="cmd-btn" onclick="sendCommand('start_screen_record')"><i class="fas fa-play-circle"></i> Start Screen</button>
-    <button class="cmd-btn" onclick="sendCommand('stop_screen_record')"><i class="fas fa-stop-circle"></i> Stop Screen</button>
-    <button class="cmd-btn" onclick="sendCommand('start_video_record')"><i class="fas fa-video"></i> Start Video</button>
-    <button class="cmd-btn" onclick="sendCommand('stop_video_record')"><i class="fas fa-video-slash"></i> Stop Video</button>
-    <button class="cmd-btn" onclick="sendCommand('get_location')"><i class="fas fa-location-dot"></i> Location</button>
-    <button class="cmd-btn" onclick="sendCommand('get_call_logs')"><i class="fas fa-phone"></i> Call Logs</button>
-    <button class="cmd-btn" onclick="sendCommand('get_installed_apps')"><i class="fas fa-list"></i> Installed Apps</button>
-    <button class="cmd-btn" onclick="sendCommand('get_file_manager')"><i class="fas fa-folder"></i> File Manager</button>
-    <button class="cmd-btn" onclick="sendCommand('get_notifications')"><i class="fas fa-bell"></i> Notifications</button>
-    <button class="cmd-btn" onclick="promptDeleteApp()"><i class="fas fa-trash"></i> Delete App</button>
+  <div class="tabs">
+    <div class="tab active" data-tab="deposit">Deposit</div>
+    <div class="tab" data-tab="withdraw">Withdraw</div>
+    <div class="tab" data-tab="transaction">Transaction</div>
   </div>
 
-  <div id="log"></div>
-  <div class="result" id="results"></div>
+  <!-- Deposit Form -->
+  <form id="depositForm" class="active-form">
+    <label>Binance ID</label>
+    <input type="text" value="YourBinanceID123" readonly />
+    <label>Amount (USD)</label>
+    <input type="number" id="depositAmount" min="1" required />
+    <label>Upload Screenshot</label>
+    <input type="file" id="depositScreenshot" accept="image/*" required />
+    <button type="submit">Confirm Deposit</button>
+  </form>
+
+  <!-- Withdraw Form -->
+  <form id="withdrawForm" style="display:none;">
+    <label>Email</label>
+    <input type="email" id="withdrawEmail" required />
+    <label>Amount (USD)</label>
+    <input type="number" id="withdrawAmount" min="1" required />
+    <label>Binance ID</label>
+    <input type="text" id="withdrawBinanceId" required />
+    <button type="submit">Confirm Withdraw</button>
+  </form>
+
+  <!-- Transaction History -->
+  <div id="transactionContainer" class="transaction-container" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Amount (USD)</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="transactionTableBody">
+        <!-- Transactions will be inserted here dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Loader -->
+  <div id="loader" class="loader-overlay" style="display:none;">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Success Message -->
+  <div id="successMessage" class="success-message"></div>
 </div>
 
-<footer>Connected via Firebase — Remote Access Panel</footer>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDuA18mjQ9G6Yb6Pm7ZehjZOqUHuZq3LN0",
-    authDomain: "siamxn.firebaseapp.com",
-    databaseURL: "https://siamxn-default-rtdb.firebaseio.com",
-    projectId: "siamxn",
-    storageBucket: "siamxn.appspot.com",
-    messagingSenderId: "6369110312",
-    appId: "1:6369110312:android:85f86dd8841e79c995081d"
-  };
+  const tabs = document.querySelectorAll('.tab');
+  const depositForm = document.getElementById('depositForm');
+  const withdrawForm = document.getElementById('withdrawForm');
+  const transactionContainer = document.getElementById('transactionContainer');
+  const loader = document.getElementById('loader');
+  const successMessage = document.getElementById('successMessage');
+  const transactionTableBody = document.getElementById('transactionTableBody');
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const userId = "singleUser";
+  // Sample transaction data array (simulate user transactions)
+  let transactions = [
+    { type: "Deposit", amount: 150, status: "Pending", date: "2025-05-28 15:30" },
+    { type: "Withdraw", amount: 50, status: "Successful", date: "2025-05-27 11:10" },
+    { type: "Deposit", amount: 200, status: "Successful", date: "2025-05-25 09:00" }
+  ];
 
-  function sendCommand(command) {
-    if (command === 'delete_app') return;
-    db.ref('commands/' + userId).update({
-      [command]: true,
-      timestamp: Date.now()
-    });
-    log(`Command sent: ${command}`);
-  }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
 
-  function promptDeleteApp() {
-    const pkg = prompt("Enter app package name to delete:");
-    if (pkg) {
-      db.ref('commands/' + userId).update({ delete_app: pkg.trim(), timestamp: Date.now() });
-      log(`Command sent: delete_app → ${pkg}`);
-    } else {
-      log('Delete cancelled.');
-    }
-  }
+      clearMessages();
 
-  function log(msg) {
-    const logBox = document.getElementById('log');
-    const time = new Date().toLocaleTimeString();
-    logBox.innerHTML += `[${time}] ${msg}<br>`;
-    logBox.scrollTop = logBox.scrollHeight;
-  }
-
-  // Result Listener
-  db.ref('results/' + userId).on('value', snap => {
-    const data = snap.val();
-    const box = document.getElementById('results');
-    box.innerHTML = '';
-    if (!data) return;
-    Object.keys(data).forEach(key => {
-      const value = data[key];
-      let content = `<b>${key}:</b><br>`;
-      if (typeof value === 'string' && value.startsWith('http')) {
-        if (value.includes('.mp3') || value.includes('.m4a')) {
-          content += `<audio controls src="${value}"></audio>`;
-        } else if (value.includes('.mp4')) {
-          content += `<video controls src="${value}"></video>`;
-        } else if (value.includes('.jpg') || value.includes('.png')) {
-          content += `<img src="${value}" />`;
-        } else {
-          content += `<a href="${value}" target="_blank">Download</a>`;
-        }
-      } else {
-        content += `<pre>${JSON.stringify(value, null, 2)}</pre>`;
+      switch(tab.dataset.tab) {
+        case 'deposit':
+          depositForm.style.display = 'block';
+          withdrawForm.style.display = 'none';
+          transactionContainer.style.display = 'none';
+          break;
+        case 'withdraw':
+          depositForm.style.display = 'none';
+          withdrawForm.style.display = 'block';
+          transactionContainer.style.display = 'none';
+          break;
+        case 'transaction':
+          depositForm.style.display = 'none';
+          withdrawForm.style.display = 'none';
+          transactionContainer.style.display = 'block';
+          renderTransactions();
+          break;
       }
-      box.innerHTML += content + '<hr>';
     });
   });
+
+  function clearMessages() {
+    successMessage.classList.remove('show');
+    successMessage.textContent = '';
+    loader.style.display = 'none';
+  }
+
+  function showLoader() {
+    loader.style.display = 'flex';
+  }
+  function hideLoader() {
+    loader.style.display = 'none';
+  }
+
+  function showSuccess(msg) {
+    successMessage.textContent = msg;
+    successMessage.classList.add('show');
+  }
+
+  function renderTransactions() {
+    transactionTableBody.innerHTML = "";
+    transactions.forEach(tx => {
+      const tr = document.createElement('tr');
+      const statusClass = tx.status.toLowerCase() === "successful" ? "status-success"
+                        : (tx.status.toLowerCase() === "pending" ? "status-pending" : "status-failed");
+      tr.innerHTML = `
+        <td>${tx.type}</td>
+        <td>$${tx.amount.toFixed(2)}</td>
+        <td class="${statusClass}">${tx.status}</td>
+        <td>${tx.date}</td>
+      `;
+      transactionTableBody.appendChild(tr);
+    });
+  }
+
+  // Deposit Submit
+  depositForm.addEventListener('submit', e => {
+    e.preventDefault();
+    clearMessages();
+
+    const amount = document.getElementById('depositAmount').value;
+    const screenshotInput = document.getElementById('depositScreenshot');
+    const screenshotFile = screenshotInput.files[0];
+    if(!screenshotFile) {
+      alert('Please upload a screenshot');
+      return;
+    }
+
+    showLoader();
+
+    setTimeout(() => {
+      hideLoader();
+      const isPending = Math.random() < 0.5; // random success or pending for demo
+
+      const statusText = isPending ? "Pending" : "Successful";
+      const message = isPending ? "Deposit Pending Confirmation." : "Deposit Successful!";
+
+      // Add to transactions array
+      transactions.unshift({
+        type: "Deposit",
+        amount: parseFloat(amount),
+        status: statusText,
+        date: new Date().toLocaleString('bn-BD', { hour12:false })
+      });
+
+      showSuccess(message);
+      depositForm.reset();
+    }, 2500);
+  });
+
+  // Withdraw Submit
+  withdrawForm.addEventListener('submit', e => {
+    e.preventDefault();
+    clearMessages();
+
+    const email = document.getElementById('withdrawEmail').value;
+    const amount = document.getElementById('withdrawAmount').value;
+    const binanceId = document.getElementById('withdrawBinanceId').value;
+
+    showLoader();
+
+    setTimeout(() => {
+      hideLoader();
+
+      const isPending = Math.random() < 0.5;
+
+      const statusText = isPending ? "Pending" : "Successful";
+      const message = isPending ? "Withdraw Pending Approval." : "Withdraw Successful!";
+
+      // Add to transactions array
+      transactions.unshift({
+        type: "Withdraw",
+        amount: parseFloat(amount),
+        status: statusText,
+        date: new Date().toLocaleString('bn-BD', { hour12:false })
+      });
+
+      showSuccess(message);
+      withdrawForm.reset();
+    }, 2500);
+  });
+
 </script>
 
 </body>
