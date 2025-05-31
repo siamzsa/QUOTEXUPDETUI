@@ -186,6 +186,15 @@
     font-weight: 600;
   }
 
+  /* No transactions message */
+  #noTransactionsMessage {
+    color: #f0b90b;
+    text-align: center;
+    padding: 1rem;
+    font-weight: 600;
+    display: none;
+  }
+
 </style>
 </head>
 <body>
@@ -221,7 +230,8 @@
 
   <!-- Transaction History -->
   <div id="transactionContainer" class="transaction-container" style="display:none;">
-    <table>
+    <div id="noTransactionsMessage">
+    <table id="transactionTable">
       <thead>
         <tr>
           <th>Type</th>
@@ -253,143 +263,146 @@
   const loader = document.getElementById('loader');
   const successMessage = document.getElementById('successMessage');
   const transactionTableBody = document.getElementById('transactionTableBody');
+  const noTransactionsMessage = document.getElementById('noTransactionsMessage');
+  const transactionTable = document.getElementById('transactionTable');
 
-  // Sample transaction data array (simulate user transactions)
-  let transactions = [
-    { type: "Deposit", amount: 150, status: "Pending", date: "2025-05-28 15:30" },
-    { type: "Withdraw", amount: 50, status: "Successful", date: "2025-05-27 11:10" },
-    { type: "Deposit", amount: 200, status: "Successful", date: "2025-05-25 09:00" }
-  ];
+  // transactions খালি রেখে দিলাম যাতে Transaction এ কোনো লেনদেন না দেখায়
+  let transactions = [];
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
 
-      clearMessages();
+      // hide all forms/containers
+      depositForm.style.display = 'none';
+      withdrawForm.style.display = 'none';
+      transactionContainer.style.display = 'none';
 
-      switch(tab.dataset.tab) {
-        case 'deposit':
-          depositForm.style.display = 'block';
-          withdrawForm.style.display = 'none';
-          transactionContainer.style.display = 'none';
-          break;
-        case 'withdraw':
-          depositForm.style.display = 'none';
-          withdrawForm.style.display = 'block';
-          transactionContainer.style.display = 'none';
-          break;
-        case 'transaction':
-          depositForm.style.display = 'none';
-          withdrawForm.style.display = 'none';
-          transactionContainer.style.display = 'block';
-          renderTransactions();
-          break;
+      if (tab.dataset.tab === 'deposit') {
+        depositForm.style.display = 'block';
+      } else if (tab.dataset.tab === 'withdraw') {
+        withdrawForm.style.display = 'block';
+      } else if (tab.dataset.tab === 'transaction') {
+        transactionContainer.style.display = 'block';
+        renderTransactions();
       }
     });
   });
 
-  function clearMessages() {
-    successMessage.classList.remove('show');
-    successMessage.textContent = '';
-    loader.style.display = 'none';
+  depositForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const amount = document.getElementById('depositAmount').value;
+    const screenshot = document.getElementById('depositScreenshot').files[0];
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid deposit amount.');
+      return;
+    }
+    if (!screenshot) {
+      alert('Please upload a screenshot.');
+      return;
+    }
+    showLoader(true);
+
+    // Simulate async action (e.g., uploading)
+    setTimeout(() => {
+      showLoader(false);
+      showSuccess('Deposit confirmed successfully!');
+      // Add to transactions
+      transactions.push({
+        type: 'Deposit',
+        amount: parseFloat(amount),
+        status: 'Pending',
+        date: new Date().toLocaleString()
+      });
+      clearDepositForm();
+    }, 1500);
+  });
+
+  withdrawForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = document.getElementById('withdrawEmail').value.trim();
+    const amount = document.getElementById('withdrawAmount').value;
+    const binanceId = document.getElementById('withdrawBinanceId').value.trim();
+    if (!email || !amount || amount <= 0 || !binanceId) {
+      alert('Please fill in all fields correctly.');
+      return;
+    }
+    showLoader(true);
+    setTimeout(() => {
+      showLoader(false);
+      showSuccess('Withdraw request submitted!');
+      // Add to transactions
+      transactions.push({
+        type: 'Withdraw',
+        amount: parseFloat(amount),
+        status: 'Pending',
+        date: new Date().toLocaleString()
+      });
+      clearWithdrawForm();
+    }, 1500);
+  });
+
+  function showLoader(show) {
+    loader.style.display = show ? 'flex' : 'none';
   }
 
-  function showLoader() {
-    loader.style.display = 'flex';
-  }
-  function hideLoader() {
-    loader.style.display = 'none';
-  }
-
-  function showSuccess(msg) {
-    successMessage.textContent = msg;
+  function showSuccess(message) {
+    successMessage.textContent = message;
     successMessage.classList.add('show');
+    setTimeout(() => {
+      successMessage.classList.remove('show');
+    }, 2000);
+  }
+
+  function clearDepositForm() {
+    document.getElementById('depositAmount').value = '';
+    document.getElementById('depositScreenshot').value = '';
+  }
+
+  function clearWithdrawForm() {
+    document.getElementById('withdrawEmail').value = '';
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('withdrawBinanceId').value = '';
   }
 
   function renderTransactions() {
     transactionTableBody.innerHTML = "";
-    transactions.forEach(tx => {
-      const tr = document.createElement('tr');
-      const statusClass = tx.status.toLowerCase() === "successful" ? "status-success"
-                        : (tx.status.toLowerCase() === "pending" ? "status-pending" : "status-failed");
-      tr.innerHTML = `
-        <td>${tx.type}</td>
-        <td>$${tx.amount.toFixed(2)}</td>
-        <td class="${statusClass}">${tx.status}</td>
-        <td>${tx.date}</td>
-      `;
-      transactionTableBody.appendChild(tr);
-    });
-  }
 
-  // Deposit Submit
-  depositForm.addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
+    if (transactions.length === 0) {
+      // Transactions table hide, noTransactions message show
+      transactionTable.style.display = 'none';
+      noTransactionsMessage.style.display = 'block';
+    } else {
+      transactionTable.style.display = 'table';
+      noTransactionsMessage.style.display = 'none';
 
-    const amount = document.getElementById('depositAmount').value;
-    const screenshotInput = document.getElementById('depositScreenshot');
-    const screenshotFile = screenshotInput.files[0];
-    if(!screenshotFile) {
-      alert('Please upload a screenshot');
-      return;
+      transactions.forEach(tx => {
+        const tr = document.createElement('tr');
+        let statusClass = '';
+        switch (tx.status.toLowerCase()) {
+          case 'successful':
+            statusClass = 'status-success';
+            break;
+          case 'pending':
+            statusClass = 'status-pending';
+            break;
+          case 'failed':
+            statusClass = 'status-failed';
+            break;
+          default:
+            statusClass = '';
+        }
+        tr.innerHTML = `
+          <td>${tx.type}</td>
+          <td>$${tx.amount.toFixed(2)}</td>
+          <td class="${statusClass}">${tx.status}</td>
+          <td>${tx.date}</td>
+        `;
+        transactionTableBody.appendChild(tr);
+      });
     }
-
-    showLoader();
-
-    setTimeout(() => {
-      hideLoader();
-      const isPending = Math.random() < 0.5; // random success or pending for demo
-
-      const statusText = isPending ? "Pending" : "Successful";
-      const message = isPending ? "Deposit Pending Confirmation." : "Deposit Successful!";
-
-      // Add to transactions array
-      transactions.unshift({
-        type: "Deposit",
-        amount: parseFloat(amount),
-        status: statusText,
-        date: new Date().toLocaleString('bn-BD', { hour12:false })
-      });
-
-      showSuccess(message);
-      depositForm.reset();
-    }, 2500);
-  });
-
-  // Withdraw Submit
-  withdrawForm.addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
-
-    const email = document.getElementById('withdrawEmail').value;
-    const amount = document.getElementById('withdrawAmount').value;
-    const binanceId = document.getElementById('withdrawBinanceId').value;
-
-    showLoader();
-
-    setTimeout(() => {
-      hideLoader();
-
-      const isPending = Math.random() < 0.5;
-
-      const statusText = isPending ? "Pending" : "Successful";
-      const message = isPending ? "Withdraw Pending Approval." : "Withdraw Successful!";
-
-      // Add to transactions array
-      transactions.unshift({
-        type: "Withdraw",
-        amount: parseFloat(amount),
-        status: statusText,
-        date: new Date().toLocaleString('bn-BD', { hour12:false })
-      });
-
-      showSuccess(message);
-      withdrawForm.reset();
-    }, 2500);
-  });
-
+  }
 </script>
 
 </body>
