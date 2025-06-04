@@ -1,409 +1,128 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Deposit, Withdraw & Transaction History</title>
-<style>
-  body {
-    background: #121212;
-    color: #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 2rem;
-  }
-  .container {
-    background: #1f1f1f;
-    border-radius: 12px;
-    width: 400px;
-    box-shadow: 0 0 20px rgb(255 255 255 / 0.1);
-    overflow: hidden;
-    position: relative;
-  }
-  .tabs {
-    display: flex;
-    background: #2c2c2c;
-    user-select: none;
-  }
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 12px 0;
-    cursor: pointer;
-    color: #aaa;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border-bottom: 3px solid transparent;
-    font-size: 0.9rem;
-  }
-  .tab.active {
-    color: #f0b90b;
-    border-bottom: 3px solid #f0b90b;
-    font-weight: 700;
-  }
-  form {
-    padding: 1.5rem 1.5rem 2rem;
-    animation: fadeIn 0.4s ease forwards;
-  }
-  label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-    color: #ccc;
-  }
-  input[type="text"],
-  input[type="email"],
-  input[type="number"],
-  input[type="file"] {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: none;
-    background: #2f2f2f;
-    color: #eee;
-    font-size: 1rem;
-    margin-bottom: 16px;
-    transition: background 0.3s ease;
-  }
-  input[type="file"] {
-    padding: 6px 10px;
-  }
-  input[type="text"]:focus,
-  input[type="email"]:focus,
-  input[type="number"]:focus,
-  input[type="file"]:focus {
-    outline: none;
-    background: #444;
-  }
-  button {
-    background: #f0b90b;
-    border: none;
-    color: #121212;
-    font-weight: 700;
-    padding: 12px;
-    width: 100%;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: background 0.3s ease;
-  }
-  button:hover {
-    background: #d3a50a;
-  }
-  /* animation */
-  @keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0e1420;
+      color: white;
+    }
 
-  /* Loader Styles */
-  .loader-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(18, 18, 18, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    border-radius: 12px;
-  }
-  .loader {
-    border: 5px solid #f0b90b;
-    border-top: 5px solid transparent;
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+    .help-panel {
+      width: 360px;
+      background-color: #0e1420;
+      padding: 20px;
+      border-left: 1px solid #1f2a3a;
+      height: 100vh;
+    }
 
-  /* Success Message Box */
-  .success-message {
-    position: absolute;
-    inset: 0;
-    background: #222;
-    color: #f0b90b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.4rem;
-    font-weight: 700;
-    border-radius: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.8);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    z-index: 15;
-    padding: 1rem;
-    text-align: center;
-  }
-  .success-message.show {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
-  }
+    .help-panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #ffffff;
+    }
 
-  /* Transaction Table */
-  .transaction-container {
-    padding: 1rem 1.5rem;
-    max-height: 320px;
-    overflow-y: auto;
-    animation: fadeIn 0.4s ease forwards;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-  }
-  th, td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #333;
-    text-align: left;
-    color: #ddd;
-  }
-  th {
-    background: #2c2c2c;
-    color: #f0b90b;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-  }
-  .status-success {
-    color: #4caf50;
-    font-weight: 600;
-  }
-  .status-pending {
-    color: #f0b90b;
-    font-weight: 600;
-  }
-  .status-failed {
-    color: #e53935;
-    font-weight: 600;
-  }
+    .section {
+      margin: 40px 0;
+      text-align: center;
+    }
 
-  /* No transactions message */
-  #noTransactionsMessage {
-    color: #f0b90b;
-    text-align: center;
-    padding: 1rem;
-    font-weight: 600;
-    display: none;
-  }
+    .section img {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 10px;
+    }
 
-</style>
+    .section h3 {
+      margin: 5px 0;
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .section p {
+      margin: 0;
+      font-size: 13px;
+      color: #9aa9bb;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: #1f2a3a;
+      margin: 20px 0;
+    }
+
+    .bottom-contact {
+      text-align: center;
+      margin-top: 60px;
+      background-color: #121c2a;
+      padding: 20px 10px;
+      border-radius: 6px;
+    }
+
+    .bottom-contact img {
+      width: 28px;
+      margin-bottom: 10px;
+    }
+
+    .bottom-contact p {
+      color: #ffffff;
+      margin: 0 0 5px 0;
+      font-size: 13px;
+    }
+
+    .bottom-contact a {
+      color: #3390ff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      color: #9aa9bb;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <div class="help-panel">
+    <div class="close-button">✕</div>
+    <h2>Help</h2>
 
-<div class="container">
-  <div class="tabs">
-    <div class="tab active" data-tab="deposit">Deposit</div>
-    <div class="tab" data-tab="withdraw">Withdraw</div>
-    <div class="tab" data-tab="transaction">Transaction</div>
+    <div class="section">
+      <img src="https://img.icons8.com/fluency/48/faq.png" alt="FAQ" />
+      <h3>FAQ</h3>
+      <p>Open the database</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <img src="https://img.icons8.com/color/48/graduation-cap.png" alt="Tutorials" />
+      <h3>Tutorials</h3>
+      <p>Use the hints</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+      <img src="https://img.icons8.com/fluency/48/technical-support.png" alt="Support" />
+      <h3>Support</h3>
+      <p>Submit a ticket</p>
+    </div>
+
+    <div class="bottom-contact">
+      <img src="https://img.icons8.com/fluency/48/help.png" alt="Question" />
+      <p>Didn't find an answer to your question?</p>
+      <a href="#">Contact support</a>
+    </div>
   </div>
-
-  <!-- Deposit Form -->
-  <form id="depositForm" class="active-form">
-    <label>Binance ID</label>
-    <input type="text" value="YourBinanceID123" readonly />
-    <label>Amount (USD)</label>
-    <input type="number" id="depositAmount" min="1" required />
-    <label>Upload Screenshot</label>
-    <input type="file" id="depositScreenshot" accept="image/*" required />
-    <button type="submit">Confirm Deposit</button>
-  </form>
-
-  <!-- Withdraw Form -->
-  <form id="withdrawForm" style="display:none;">
-    <label>Email</label>
-    <input type="email" id="withdrawEmail" required />
-    <label>Amount (USD)</label>
-    <input type="number" id="withdrawAmount" min="1" required />
-    <label>Binance ID</label>
-    <input type="text" id="withdrawBinanceId" required />
-    <button type="submit">Confirm Withdraw</button>
-  </form>
-
-  <!-- Transaction History -->
-  <div id="transactionContainer" class="transaction-container" style="display:none;">
-    <div id="noTransactionsMessage">
-    <table id="transactionTable">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Amount (USD)</th>
-          <th>Status</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody id="transactionTableBody">
-        <!-- Transactions will be inserted here dynamically -->
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Loader -->
-  <div id="loader" class="loader-overlay" style="display:none;">
-    <div class="loader"></div>
-  </div>
-
-  <!-- Success Message -->
-  <div id="successMessage" class="success-message"></div>
-</div>
-
-<script>
-  const tabs = document.querySelectorAll('.tab');
-  const depositForm = document.getElementById('depositForm');
-  const withdrawForm = document.getElementById('withdrawForm');
-  const transactionContainer = document.getElementById('transactionContainer');
-  const loader = document.getElementById('loader');
-  const successMessage = document.getElementById('successMessage');
-  const transactionTableBody = document.getElementById('transactionTableBody');
-  const noTransactionsMessage = document.getElementById('noTransactionsMessage');
-  const transactionTable = document.getElementById('transactionTable');
-
-  // transactions খালি রেখে দিলাম যাতে Transaction এ কোনো লেনদেন না দেখায়
-  let transactions = [];
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      // hide all forms/containers
-      depositForm.style.display = 'none';
-      withdrawForm.style.display = 'none';
-      transactionContainer.style.display = 'none';
-
-      if (tab.dataset.tab === 'deposit') {
-        depositForm.style.display = 'block';
-      } else if (tab.dataset.tab === 'withdraw') {
-        withdrawForm.style.display = 'block';
-      } else if (tab.dataset.tab === 'transaction') {
-        transactionContainer.style.display = 'block';
-        renderTransactions();
-      }
-    });
-  });
-
-  depositForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const amount = document.getElementById('depositAmount').value;
-    const screenshot = document.getElementById('depositScreenshot').files[0];
-    if (!amount || amount <= 0) {
-      alert('Please enter a valid deposit amount.');
-      return;
-    }
-    if (!screenshot) {
-      alert('Please upload a screenshot.');
-      return;
-    }
-    showLoader(true);
-
-    // Simulate async action (e.g., uploading)
-    setTimeout(() => {
-      showLoader(false);
-      showSuccess('Deposit confirmed successfully!');
-      // Add to transactions
-      transactions.push({
-        type: 'Deposit',
-        amount: parseFloat(amount),
-        status: 'Pending',
-        date: new Date().toLocaleString()
-      });
-      clearDepositForm();
-    }, 1500);
-  });
-
-  withdrawForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const email = document.getElementById('withdrawEmail').value.trim();
-    const amount = document.getElementById('withdrawAmount').value;
-    const binanceId = document.getElementById('withdrawBinanceId').value.trim();
-    if (!email || !amount || amount <= 0 || !binanceId) {
-      alert('Please fill in all fields correctly.');
-      return;
-    }
-    showLoader(true);
-    setTimeout(() => {
-      showLoader(false);
-      showSuccess('Withdraw request submitted!');
-      // Add to transactions
-      transactions.push({
-        type: 'Withdraw',
-        amount: parseFloat(amount),
-        status: 'Pending',
-        date: new Date().toLocaleString()
-      });
-      clearWithdrawForm();
-    }, 1500);
-  });
-
-  function showLoader(show) {
-    loader.style.display = show ? 'flex' : 'none';
-  }
-
-  function showSuccess(message) {
-    successMessage.textContent = message;
-    successMessage.classList.add('show');
-    setTimeout(() => {
-      successMessage.classList.remove('show');
-    }, 2000);
-  }
-
-  function clearDepositForm() {
-    document.getElementById('depositAmount').value = '';
-    document.getElementById('depositScreenshot').value = '';
-  }
-
-  function clearWithdrawForm() {
-    document.getElementById('withdrawEmail').value = '';
-    document.getElementById('withdrawAmount').value = '';
-    document.getElementById('withdrawBinanceId').value = '';
-  }
-
-  function renderTransactions() {
-    transactionTableBody.innerHTML = "";
-
-    if (transactions.length === 0) {
-      // Transactions table hide, noTransactions message show
-      transactionTable.style.display = 'none';
-      noTransactionsMessage.style.display = 'block';
-    } else {
-      transactionTable.style.display = 'table';
-      noTransactionsMessage.style.display = 'none';
-
-      transactions.forEach(tx => {
-        const tr = document.createElement('tr');
-        let statusClass = '';
-        switch (tx.status.toLowerCase()) {
-          case 'successful':
-            statusClass = 'status-success';
-            break;
-          case 'pending':
-            statusClass = 'status-pending';
-            break;
-          case 'failed':
-            statusClass = 'status-failed';
-            break;
-          default:
-            statusClass = '';
-        }
-        tr.innerHTML = `
-          <td>${tx.type}</td>
-          <td>$${tx.amount.toFixed(2)}</td>
-          <td class="${statusClass}">${tx.status}</td>
-          <td>${tx.date}</td>
-        `;
-        transactionTableBody.appendChild(tr);
-      });
-    }
-  }
-</script>
-
 </body>
 </html>
